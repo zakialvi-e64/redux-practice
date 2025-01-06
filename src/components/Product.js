@@ -1,22 +1,33 @@
 import React from 'react';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
-import { useDispatch } from 'react-redux';
+import Alert from 'react-bootstrap/Alert';
+import { useDispatch, useSelector } from 'react-redux';
 import { add } from "../store/cartSlice";
+import { getProducts } from '../store/productSlice';
+import statusCode from '../utils/statusCode';
 
 const Product = () => {
   const dispatch = useDispatch();
-  const [products, setProducts] = useState([]);
-  useEffect(() => {
-    const getProducts = async () => {
-      const response = await axios.get("https://dummyjson.com/products");
-      setProducts(response.data.products);
-    };
+  const { data: products, status } = useSelector(state => state.products);
+  console.log({ status });
 
-    getProducts();
+  useEffect(() => {
+    dispatch(getProducts());
   }, []);
+
+  if (status === statusCode.LOADING) {
+    return (
+      <p>Loading...</p>
+    )
+  }
+
+  if (status === statusCode.ERROR) {
+    return (
+      <Alert key={"danger"} variant='danger'>Something went wrong! Try again later</Alert>
+    )
+  }
 
   const addToCart = (product) => {
     dispatch(add(product));
